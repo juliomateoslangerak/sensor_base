@@ -14,7 +14,7 @@ MicroPython SSD1306 OLED driver, I2C and SPI interfaces
 import time
 
 from micropython import const
-from adafruit_bus_device import i2c_device, spi_device
+from adafruit_bus_device import i2c_device
 
 try:
     import framebuf
@@ -141,22 +141,6 @@ class _SSD1306(framebuf.FrameBuffer):
         self.write_cmd(SET_DISP)
         self._power = False
 
-    def contrast(self, contrast):
-        """Adjust the contrast"""
-        self.write_cmd(SET_CONTRAST)
-        self.write_cmd(contrast)
-
-    def invert(self, invert):
-        """Invert all pixels on the display"""
-        self.write_cmd(SET_NORM_INV | (invert & 1))
-
-    def rotate(self, rotate):
-        """Rotate the display 0 or 180 degrees"""
-        self.write_cmd(SET_COM_OUT_DIR | ((rotate & 1) << 3))
-        self.write_cmd(SET_SEG_REMAP | (rotate & 1))
-        # com output (vertical mirror) is changed immediately
-        # you need to call show() for the seg remap to be visible
-
     def write_framebuf(self):
         """Derived class must implement this"""
         raise NotImplementedError
@@ -262,68 +246,3 @@ class SSD1306_I2C(_SSD1306):
         else:
             with self.i2c_device:
                 self.i2c_device.write(self.buffer)
-
-
-# pylint: disable-msg=too-many-arguments
-class SSD1306_SPI(_SSD1306):
-    """
-    SPI class for SSD1306
-
-    :param width: the width of the physical screen in pixels,
-    :param height: the height of the physical screen in pixels,
-    :param spi: the SPI peripheral to use,
-    :param dc: the data/command pin to use (often labeled "D/C"),
-    :param reset: the reset pin to use,
-    :param cs: the chip-select pin to use (sometimes labeled "SS").
-    """
-
-    # pylint: disable=no-member
-    # Disable should be reconsidered when refactor can be tested.
-    def __init__(
-        self,
-        width,
-        height,
-        spi,
-        dc,
-        reset,
-        cs,
-        *,
-        external_vcc=False,
-        baudrate=8000000,
-        polarity=0,
-        phase=0,
-        page_addressing=False
-    ):
-        self.page_addressing = page_addressing
-        if self.page_addressing:
-            raise NotImplementedError(
-                "Page addressing mode with SPI has not yet been implemented."
-            )
-
-        self.rate = 10 * 1024 * 1024
-        dc.switch_to_output(value=0)
-        self.spi_device = spi_device.SPIDevice(
-            spi, cs, baudrate=baudrate, polarity=polarity, phase=phase
-        )
-        self.dc_pin = dc
-        self.buffer = bytearray((height // 8) * width)
-        super().__init__(
-            memoryview(self.buffer),
-            width,
-            height,
-            external_vcc=external_vcc,
-            reset=reset,
-            page_addressing=self.page_addressing,
-        )
-
-    def write_cmd(self, cmd):
-        """Send a command to the SPI device"""
-        self.dc_pin.value = 0
-        with self.spi_device as spi:
-            spi.write(bytearray([cmd]))
-
-    def write_framebuf(self):
-        """write to the frame buffer via SPI"""
-        self.dc_pin.value = 1
-        with self.spi_device as spi:
-            spi.write(self.buffer)
