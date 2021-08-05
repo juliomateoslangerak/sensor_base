@@ -12,9 +12,6 @@
 * Author(s): Damien P. George, Scott Shawcroft, Carter Nelson, Rose Hooper
 """
 
-# pylint: disable=ungrouped-imports
-import sys
-import board
 import digitalio
 from neopixel_write import neopixel_write
 
@@ -32,12 +29,6 @@ __repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_NeoPixel.git"
 
 
 # Pixel color order constants
-RGB = "RGB"
-"""Red Green Blue"""
-GRB = "GRB"
-"""Green Red Blue"""
-RGBW = "RGBW"
-"""Red Green Blue White"""
 GRBW = "GRBW"
 """Green Red Blue White"""
 
@@ -102,27 +93,10 @@ class NeoPixel(adafruit_pixelbuf.PixelBuf):
     """
 
     def __init__(
-        self, pin, n, *, bpp=3, brightness=1.0, auto_write=True, pixel_order=None
+        self, pin, n, *, brightness=1.0, auto_write=True, pixel_order=GRBW
     ):
-        if not pixel_order:
-            pixel_order = GRB if bpp == 3 else GRBW
-        elif isinstance(pixel_order, tuple):
-            order_list = [RGBW[order] for order in pixel_order]
-            pixel_order = "".join(order_list)
 
         self._power = None
-        if (
-            sys.implementation.version[0] >= 7
-            and getattr(board, "NEOPIXEL", None) == pin
-        ):
-            power = getattr(board, "NEOPIXEL_POWER_INVERTED", None)
-            polarity = power is None
-            if not power:
-                power = getattr(board, "NEOPIXEL_POWER", None)
-            if power:
-                self._power = digitalio.DigitalInOut(power)
-                self._power.switch_to_output(value=polarity)
-
         super().__init__(
             n, brightness=brightness, byteorder=pixel_order, auto_write=auto_write
         )
@@ -153,12 +127,6 @@ class NeoPixel(adafruit_pixelbuf.PixelBuf):
         The number of neopixels in the chain (read-only)
         """
         return len(self)
-
-    def write(self):
-        """.. deprecated: 1.0.0
-
-        Use ``show`` instead. It matches Micro:Bit and Arduino APIs."""
-        self.show()
 
     def _transmit(self, buffer):
         neopixel_write(self.pin, buffer)
