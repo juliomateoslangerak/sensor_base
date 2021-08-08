@@ -21,9 +21,6 @@ try:
 except ImportError:
     import adafruit_framebuf as framebuf
 
-__version__ = "2.12.0"
-__repo__ = "https://github.com/adafruit/Adafruit_CircuitPython_SSD1306.git"
-
 # register definitions
 SET_CONTRAST = const(0x81)
 SET_ENTIRE_ON = const(0xA4)
@@ -86,16 +83,6 @@ class _SSD1306(framebuf.FrameBuffer):
 
     def init_display(self):
         """Base class to initialize display"""
-        # The various screen sizes available with the ssd1306 OLED driver
-        # chip require differing configuration values for the display clock
-        # div and com pin, which are listed below for reference and future
-        # compatibility:
-        #    w,  h: DISP_CLK_DIV  COM_PIN_CFG
-        #  128, 64:         0x80         0x12
-        #  128, 32:         0x80         0x02
-        #   96, 16:         0x60         0x02
-        #   64, 48:         0x80         0x12
-        #   64, 32:         0x80         0x12
         for cmd in (
             SET_DISP,  # off
             # address setting

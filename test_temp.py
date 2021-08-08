@@ -2,7 +2,7 @@ import board
 from adafruit_onewire.bus import OneWireBus
 import adafruit_ds18x20
 
-ow_bus = OneWireBus(board.D6)
+ow_bus = OneWireBus(board.D9)
 
 devices = ow_bus.scan()
 for device in devices:
