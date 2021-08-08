@@ -24,8 +24,8 @@ from neopixel import Neopixel
 pm25_reset_pin = None
 pm25_int_tx_pin = board.TX
 pm25_int_rx_pin = board.RX
-pm25_ext_tx_pin = board.XXX  # https://learn.adafruit.com/circuitpython-essentials/circuitpython-uart-serial
-pm25_ext_rx_pin = board.XXX
+pm25_ext_tx_pin = board.A1  # https://learn.adafruit.com/circuitpython-essentials/circuitpython-uart-serial
+pm25_ext_rx_pin = board.A2
 
 screen_reset_pin = board.D5
 screen_clock_pin = board.SCL
@@ -39,8 +39,12 @@ radio_miso_pin = board.MISO
 radio_cs_pin = board.RFM69_CS
 radio_freq = 868.0
 
-temp_data_pin = board.D6
+temp_data_pin = board.D9
 temp_addresses = {'int': b'XXX',}
+
+neopixel_pin = board.D6
+
+button_pin = board.D14
 
 # Create pm25 connections
 uart_int = busio.UART(pm25_int_tx_pin, pm25_int_rx_pin, baudrate=9600)
